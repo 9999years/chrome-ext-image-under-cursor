@@ -4,6 +4,31 @@ document.addEventListener('contextmenu', e => {
 
 var lastContextClick = { x: NaN, y: NaN, target: undefined }
 
+let isURL = url => url.startsWith('url(')
+
+// e.g. url = url("https://78.media.tumblr.com/avatar_bdf460ee0a4a_128.pnj")
+// https://developer.mozilla.org/en-US/docs/Web/CSS/url
+let trimURL = url => {
+	if(! isURL(url)) {
+		return undefined
+	}
+
+	return url.substring(4, url.length - 1).replace(/^["']|["']$/g, '')
+}
+
+let bgURL = el => {
+	var url
+	while(el && !url) {
+		url = trimURL(el.style.backgroundImage)
+		el = el.parentElement
+	}
+
+	if(url)
+		console.log(url)
+
+	return url
+}
+
 let area = img => img.naturalHeight * img.naturalWidth
 
 // https://stackoverflow.com/a/4020842
@@ -61,10 +86,27 @@ function clicked() {
 	}
 
 	var ret = undefined
-	if(candidates.length > 0) {
-		ret = {url: largest(closest(lastContextClick.target, candidates)).src}
+	if(candidates.length === 0) {
+		// sometimes websites (tumblr) are nasty and place their images
+		// (profile pictures on the default theme) in background urls.
+		// i dont know why. maybe just to cause me problems?
+		//
+		// here we dig through the css looking for an answer
+		ret = bgURL(lastContextClick.target)
 	} else {
+		// get closest image to candidates we found
+		ret = largest(closest(lastContextClick.target, candidates)).src
+	}
+
+	if(ret === undefined) {
+		// bgURL *might* have found an image so we only *might* have to
+		// call this
+		console.log('No images found under your cursor')
 		noneFound()
+	} else {
+		// im keeping these in tbh
+		console.log('Found an image under your cursor: ' + ret)
+		ret = {url: ret}
 	}
 
 	lastContextClick = { x: NaN, y: NaN, target: undefined }
