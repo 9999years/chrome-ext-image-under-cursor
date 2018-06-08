@@ -1,11 +1,3 @@
-chrome.runtime.onInstalled.addListener(() => {
-	chrome.contextMenus.create({
-		title: 'Attempt to open image in new tab',
-		contexts: ['page', 'frame', 'selection', 'link', 'image',
-			'video', 'audio', 'editable'],
-	})
-})
-
 chrome.contextMenus.onClicked.addListener((info, tab) => {
 	// click = open image in new tab
 	let opts = {frameId: 0}
@@ -23,4 +15,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 			})
 		}
 	})
+})
+
+chrome.contextMenus.create({
+	title: 'Attempt to open image in new tab',
+	contexts: ['page', 'frame', 'selection', 'link', 'image',
+		'video', 'audio', 'editable'],
 })
