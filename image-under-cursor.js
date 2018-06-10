@@ -25,7 +25,6 @@ let urlRe        = new RegExp((() => {
 })())
 
 let parseEscape = str => {
-
 	let newlineStr   = `[\n\f]|\r\n?`
 	let newline      = new RegExp(`^(?:${newlineStr})`) //!
 
@@ -58,27 +57,32 @@ let parseUnquotedURL = str => {
 	// str := urlOK | escape
 	let ret = []
 	let consume = (tok, amt) => {
+		console.log(`consuming \`${tok}\` and ${amt}`)
 		if(tok) {
 			console.log(`consuming: \`${tok}\``)
 			ret.push(tok)
 		}
 		if(amt === undefined) {
+			if(tok === undefined) {
+				throw 'tok and amt undefined?'
+			}
 			amt = tok.length
 		}
 		if(amt > 0) {
 			console.log(`skipping first ${amt} chars of string`)
 			str = str.substring(amt)
 			console.log(`str: \`${str}\``)
+			console.log(`strlen: \`${str.length}\``)
 		}
 	}
 
 	let nonPrintable = `\x00-\x08\x0b\x0e-\x1f\x7f`
 	let wsChars      = `\r\n\f\t `
-	let urlOK        = new RegExp(`^[^\\"'()\\${wsChars}${nonPrintable}]+`)
+	let urlOK        = new RegExp(`^[^"'()\\\\${wsChars}${nonPrintable}]+`)
 
 	console.log(`parsing: ${str}`)
 	// make sure these regex are from the start of the string
-	for(var i = 0; i < str.length; ) {
+	while(str.length > 0) {
 		if((tok = urlOK.exec(str)) !== null) {
 			console.log(`found OK chars ${tok[0]}`)
 			consume(tok[0])
@@ -91,6 +95,7 @@ let parseUnquotedURL = str => {
 		}
 	}
 
+	console.log('-----------')
 	return ret.join('')
 }
 
@@ -105,6 +110,7 @@ let parseQuotedString = str => {
 	// * backslash + newline
 	let ret = []
 	let consume = (tok, amt) => {
+		console.log(`consuming \`${tok}\` and ${amt}`)
 		if(tok) {
 			console.log(`consuming: \`${tok}\``)
 			ret.push(tok)
@@ -116,6 +122,7 @@ let parseQuotedString = str => {
 			console.log(`skipping first ${amt} chars of string`)
 			str = str.substring(amt)
 			console.log(`str: \`${str}\``)
+			console.log(`strlen: \`${str.length}\``)
 		}
 	}
 
@@ -144,7 +151,7 @@ let parseQuotedString = str => {
 
 	console.log(`parsing: ${str}`)
 	// make sure these regex are from the start of the string
-	for(var i = 0; i < str.length; ) {
+	while(str.length > 0) {
 		if((tok = stringOK.exec(str)) !== null) {
 			console.log(`found OK chars ${tok[0]}`)
 			consume(tok[0])
