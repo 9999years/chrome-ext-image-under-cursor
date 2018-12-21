@@ -21,14 +21,15 @@ let urlRe        = new RegExp((() => {
 
 	let urlOK        = `[^\\"'()\\${wsChars}${nonPrintable}]`
 	let urlUnquoted  = `(?:${urlOK}|${escapeToken})*`
-	return `url\\(${ws}(${urlUnquoted}|${stringToken})${ws}\\)`
+	return `[uU][rR][lL]\\(${ws}(${urlUnquoted}|${stringToken})${ws}\\)`
 })())
 
 let parseEscape = str => {
 	let newlineStr   = `[\n\f]|\r\n?`
-	let newline      = new RegExp(`^(?:${newlineStr})`) //!
+	let newline      = new RegExp(`^(?:${newlineStr})`)
 
 	let hexDigit     = `0-9a-fA-F`
+	// hex escape not incl. backslash
 	let partialHexEsc = new RegExp((() => {
 		let whitespace = `[\n\f\t ]|\r\n?`
 		return `^([${hexDigit}]{1,6})(?:${whitespace})?`
@@ -54,6 +55,7 @@ let parseEscape = str => {
 }
 
 let parseUnquotedURL = str => {
+	console.log(`parsing unquoted url ${JSON.stringify(str)}`)
 	// str := urlOK | escape
 	let ret = []
 	let consume = (tok, amt) => {
@@ -87,6 +89,7 @@ let parseUnquotedURL = str => {
 			console.log(`found OK chars ${tok[0]}`)
 			consume(tok[0])
 		} else if(str[0] === '\\') {
+			console.log('found escape')
 			// consume backslash
 			consume('', 1)
 			console.log('consuming \\')
@@ -100,6 +103,7 @@ let parseUnquotedURL = str => {
 }
 
 let parseQuotedString = str => {
+	console.log(`parsing quoted string ${str}`)
 	let quote = str[0]
 	// trim front / end quote
 	str = str.substring(1, str.length - 1)
@@ -297,7 +301,8 @@ function noneFound() {
 
 if (typeof exports !== 'undefined') {
 	// unit tests
-	exports.extractURL = extractURL
+	exports.extractURL  = extractURL
+	exports.parseEscape = parseEscape
 } else {
 	// when you use it
 	document.addEventListener('contextmenu', e => {
